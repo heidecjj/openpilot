@@ -38,7 +38,7 @@ maneuvers = [
     speed_lead_values = [20.*CV.MPH_TO_MS],
     speed_lead_breakpoints = [0.],
     cruise_button_presses = [(CB.DECEL_SET, 0.1), (0, 0.2)],
-    v_fault_cos = [2.0,8]
+    d_fault_cos = [2.0,8]
   ),
   Maneuver(
     'model at 40mph following lead at 20mph. Starts 200m away. Plus cos and impulse d_fault',
@@ -49,8 +49,8 @@ maneuvers = [
     speed_lead_values = [20.*CV.MPH_TO_MS],
     speed_lead_breakpoints = [0.],
     cruise_button_presses = [(CB.DECEL_SET, 0.1), (0, 0.2)],
-    v_fault_cos = [2.0,8],
-    v_fault_impulse = [-20.0, 10.0, 10.1]
+    d_fault_cos = [2.0,8],
+    d_fault_impulse = [-20.0, 10.0, 10.1]
   )
 ]
 #
