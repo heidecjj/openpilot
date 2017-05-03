@@ -35,11 +35,15 @@ class ManeuverPlot(object):
     self.v_target_array = []
 
     self.title = title
+
+    # Added to simulate sensor faults - JJH
+    self.d_rel_sensor_array = []
+    self.v_rel_sensor_array = []
     
   def add_data(self, time, gas, brake, steer_torque, distance, speed, 
     acceleration, up_accel_cmd, ui_accel_cmd, d_rel, v_rel, v_lead, 
     v_target_lead, pid_speed, cruise_speed, jerk_factor, a_target_min, 
-    a_target_max):
+    a_target_max, d_rel_sensor, v_rel_sensor):
     self.time_array.append(time)
     self.gas_array.append(gas)
     self.brake_array.append(brake)
@@ -58,6 +62,10 @@ class ManeuverPlot(object):
     self.jerk_factor_array.append(jerk_factor)
     self.a_target_min_array.append(a_target_min)
     self.a_target_max_array.append(a_target_max)
+
+    # Added to simulate sensor faults - JJH
+    self.d_rel_sensor_array.append(d_rel_sensor)
+    self.v_rel_sensor_array.append(v_rel_sensor)
 
 
   def write_plot(self, path, maneuver_name):
@@ -130,11 +138,26 @@ class ManeuverPlot(object):
     plt.figure(plt_num)
     plt.plot(
       np.array(self.time_array), np.array(self.d_rel_array), 'g',
+      np.array(self.time_array), np.array(self.d_rel_sensor_array), 'r'
     )
     plt.xlabel('Time [s]')
     plt.ylabel('Relative Distance [m]')
     plt.grid()
+    plt.legend(["Actual","Sensor Data"], loc=0)
     pylab.savefig("/".join([path, maneuver_name, 'distance.svg']), dpi=1000)
+    
+    # relative distances chart =======
+    plt_num += 1
+    plt.figure(plt_num)
+    plt.plot(
+      np.array(self.time_array), np.array(self.v_rel_array), 'g',
+      np.array(self.time_array), np.array(self.v_rel_sensor_array), 'r'
+    )
+    plt.xlabel('Time [s]')
+    plt.ylabel('Relative Speed [m/s]')
+    plt.grid()
+    plt.legend(["Actual","Sensor Data"], loc=0)
+    pylab.savefig("/".join([path, maneuver_name, 'rel_speeds.svg']), dpi=1000)
 
     plt.close("all")
 

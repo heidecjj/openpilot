@@ -3,6 +3,7 @@ from enum import Enum
 from maneuverplots import ManeuverPlot
 from plant import Plant
 import numpy as np
+import math
 
 
 class Maneuver(object):
@@ -18,6 +19,11 @@ class Maneuver(object):
     self.speed_lead_breakpoints = kwargs.get("speed_lead_breakpoints", [0.0, duration])
 
     self.cruise_button_presses = kwargs.get("cruise_button_presses", [])
+
+    self.d_fault_cos = kwargs.get("d_fault_cos", [0.0,1.0])
+    self.d_fault_impulse = kwargs.get("d_fault_impulse", [0.0, 1, 1.1])
+    self.v_fault_cos = kwargs.get("v_fault_cos", [0.0,1.0])
+    self.v_fault_impulse = kwargs.get("v_fault_impulse", [0.0, 1, 1.1])
 
     self.duration = duration
     self.title = title
@@ -45,7 +51,14 @@ class Maneuver(object):
       grade = np.interp(plant.current_time(), self.grade_breakpoints, self.grade_values)
       speed_lead = np.interp(plant.current_time(), self.speed_lead_breakpoints, self.speed_lead_values)
 
-      distance, speed, acceleration, distance_lead, brake, gas, steer_torque, live100 = plant.step(speed_lead, current_button, grade)
+      # declare faults
+      d_fault = self.d_fault_cos[0]*math.cos(self.d_fault_cos[1]*plant.current_time()) 
+      d_fault += self.d_fault_impulse[0]*(plant.current_time()>=self.d_fault_impulse[1] and plant.current_time()<=self.d_fault_impulse[2])
+
+      v_fault = self.v_fault_cos[0]*math.cos(self.v_fault_cos[1]*plant.current_time()) 
+      v_fault += self.v_fault_impulse[0]*(plant.current_time()>=self.v_fault_impulse[1] and plant.current_time()<=self.v_fault_impulse[2])
+
+      distance, speed, acceleration, distance_lead, brake, gas, steer_torque, live100, d_rel_sensor, v_rel_sensor = plant.step(speed_lead, current_button, grade, d_fault, v_fault)
       if live100:
         last_live100 = live100[-1]
 
@@ -64,7 +77,8 @@ class Maneuver(object):
           v_target_lead=last_live100.vTargetLead, pid_speed=last_live100.vPid,
           cruise_speed=last_live100.vCruise,
           jerk_factor=last_live100.jerkFactor,
-          a_target_min=last_live100.aTargetMin, a_target_max=last_live100.aTargetMax)
+          a_target_min=last_live100.aTargetMin, a_target_max=last_live100.aTargetMax,
+          d_rel_sensor=d_rel_sensor, v_rel_sensor=v_rel_sensor)
     
     return (None, plot)
 

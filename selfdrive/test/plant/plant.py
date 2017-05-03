@@ -131,7 +131,7 @@ class Plant(object):
   def current_time(self):
     return float(self.rk.frame) / self.rate
 
-  def step(self, v_lead=0.0, cruise_buttons=None, grade=0.0):
+  def step(self, v_lead=0.0, cruise_buttons=None, grade=0.0, d_fault=0.0, v_fault=0.0):
     # dbc_f, sgs, ivs, msgs, cks_msgs, frqs = initialize_can_struct(self.civic, self.brake_only)
     cp2 = get_can_parser(self.civic, self.brake_only)
     sgs = cp2._sgs
@@ -181,7 +181,7 @@ class Plant(object):
 
     # *** radar model ***
     if self.lead_relevancy:
-      d_rel = np.maximum(0., distance_lead - distance)
+      d_rel = np.maximum(0.,distance_lead - distance)
       v_rel = v_lead - speed
     else:
       d_rel = 200.
@@ -225,6 +225,10 @@ class Plant(object):
 
       can_msgs.append([msg, 0, msg_data, 0])
 
+    # For sensor fault injection
+    d_rel_sensor = d_rel+d_fault
+    v_rel_sensor = v_rel+v_fault
+
     # add the radar message
     # TODO: use the DBC
     def to_3_byte(x):
@@ -232,9 +236,9 @@ class Plant(object):
 
     def to_3s_byte(x):
       return struct.pack("!h", int(x)).encode("hex")[1:]
-    radar_msg = to_3_byte(d_rel*16.0) + \
+    radar_msg = to_3_byte(d_rel_sensor*16.0) + \
                 to_3_byte(int(lateral_pos_rel*16.0)&0x3ff) + \
-                to_3s_byte(int(v_rel*32.0)) + \
+                to_3s_byte(int(v_rel_sensor*32.0)) + \
                 "0f00000"
     can_msgs.append([0x445, 0, radar_msg.decode("hex"), 1])
     Plant.logcan.send(can_list_to_can_capnp(can_msgs).to_bytes())
@@ -257,7 +261,7 @@ class Plant(object):
     self.distance_lead_prev = distance_lead
 
     self.rk.keep_time()
-    return (distance, speed, acceleration, distance_lead, brake, gas, steer_torque, live_msgs)
+    return (distance, speed, acceleration, distance_lead, brake, gas, steer_torque, live_msgs, d_rel_sensor, v_rel_sensor)
 
 # simple engage in standalone mode
 def plant_thread(rate=100):
