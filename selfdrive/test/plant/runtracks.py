@@ -19,7 +19,7 @@ maneuvers = [
   ),
 
  Maneuver(
-   'model at 40mph following lead at 20mph. Starts 200m away',
+   'model at 40mph following lead at 20mph. Starts 100m away',
    duration=30.,
    initial_speed = 40.*CV.MPH_TO_MS,
    lead_relevancy=True,
@@ -30,7 +30,7 @@ maneuvers = [
   ),
 
   Maneuver(
-    'model at 40mph following lead at 20mph. Starts 200m away. Plus cos d_fault',
+    'model at 40mph following lead at 20mph. Starts 100m away. Plus cos d_fault',
     duration=30.,
     initial_speed = 40.*CV.MPH_TO_MS,
     lead_relevancy=True,
@@ -41,7 +41,7 @@ maneuvers = [
     d_fault_cos = [2.0,8]
   ),
   Maneuver(
-    'model at 40mph following lead at 20mph. Starts 200m away. Plus cos and impulse d_fault',
+    'model at 40mph following lead at 20mph. Starts 100m away. Plus cos and impulse d_fault',
     duration=30.,
     initial_speed = 40.*CV.MPH_TO_MS,
     lead_relevancy=True,
